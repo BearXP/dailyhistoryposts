@@ -28,7 +28,6 @@ def _getFactsFromPage(client, offset):
 def _extractPostsFacts(posts):
     headPattern = re.compile(r"(<h1>[^<]*</h1>)")
     tagsPattern = re.compile(r"(\<[^\>]*\>)")
-    hashtagPattern = re.compile(r"^[a-z:]+:")
     datePattern = re.compile(r"[A-Za-z]+\s\d{1,2}")
     facts = {}
     count = 0
@@ -36,7 +35,8 @@ def _extractPostsFacts(posts):
         count += 1
         if post["summary"] == "On This Day In History":
             textRaw = post["body"]
-            if textRaw[:4] == "<h1>": # Reply post
+            # Reply posts start with <p>. <h1> seems to be new posts.
+            if (textRaw[:4] == "<h1>"):
                 textWoHeading = re.sub(headPattern, "", textRaw)
                 text = re.sub(tagsPattern, "", textWoHeading)
                 dateMatch = re.findall(datePattern, text)
@@ -47,7 +47,8 @@ def _extractPostsFacts(posts):
                         existingFacts.append(text)
                         facts[date] = existingFacts
                 else:
-                    pass  # On 29/June he forgot to add 'June' to the post, so it falls over.
+                    # On 29/June they forgot to add 'June' to the post, so it falls over.
+                    pass
     return facts
 
 
